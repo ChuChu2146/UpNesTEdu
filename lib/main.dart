@@ -7,6 +7,9 @@ import 'package:ui_upnestedu/screens/news_events/admin_news_screen.dart';
 import 'package:ui_upnestedu/screens/news_events/admin_events_screen.dart';
 import 'package:ui_upnestedu/screens/news_events/news_detail_screen.dart';
 import 'package:ui_upnestedu/screens/news_events/event_detail_screen.dart';
+import 'package:ui_upnestedu/screens/news_events/schedule_screen.dart';
+import 'package:ui_upnestedu/screens/news_events/exam_schedule_screen.dart';
+//import 'package:ui_upnestedu/screens/news_events/attendance_screen.dart';
 import 'package:ui_upnestedu/services/auth_service.dart';
 
 void main() {
@@ -60,6 +63,48 @@ class UpNestEduApp extends StatelessWidget {
             return const SizedBox.shrink();
           }
           return const AdminEventsScreen();
+        },
+        '/schedule': (context) {
+          // student-only schedule
+          if (!AuthService.instance.isLoggedIn ||
+              AuthService.instance.currentRole != 'Sinh viên') {
+            Future.microtask(() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Chỉ sinh viên mới truy cập được lịch học')),
+              );
+              Navigator.pushReplacementNamed(context, '/');
+            });
+            return const SizedBox.shrink();
+          }
+          return const ScheduleScreen();
+        },
+        '/exams': (context) {
+          if (!AuthService.instance.isLoggedIn ||
+              AuthService.instance.currentRole != 'Sinh viên') {
+            Future.microtask(() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Chỉ sinh viên mới truy cập được lịch thi')),
+              );
+              Navigator.pushReplacementNamed(context, '/');
+            });
+            return const SizedBox.shrink();
+          }
+          return const ExamScheduleScreen();
+        },
+        '/attendance': (context) {
+          if (!AuthService.instance.isLoggedIn ||
+              AuthService.instance.currentRole != 'Sinh viên') {
+            Future.microtask(() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Chỉ sinh viên mới điểm danh')),
+              );
+              Navigator.pushReplacementNamed(context, '/');
+            });
+            return const SizedBox.shrink();
+          }
+          return const SizedBox.shrink();
         },
       },
       initialRoute: '/login',
@@ -128,6 +173,21 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.event),
               label: const Text('Sự kiện'),
             ),
+            const SizedBox(height: 12),
+            if (isLoggedIn && AuthService.instance.currentRole == 'Sinh viên')
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/schedule'),
+                icon: const Icon(Icons.schedule),
+                label: const Text('Lịch học'),
+              ),
+            const SizedBox(height: 8),
+            if (isLoggedIn && AuthService.instance.currentRole == 'Sinh viên')
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/exams'),
+                icon: const Icon(Icons.edit_calendar),
+                label: const Text('Lịch thi'),
+              ),
+            const SizedBox(height: 8),
             if (isAdmin) ...[
               const SizedBox(height: 20),
               const Divider(),
